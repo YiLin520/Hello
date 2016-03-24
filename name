@@ -1,0 +1,520 @@
+void createRoom(char* str, int yVal, int xVal, int *doorY, int *doorX)
+{
+    int i, j, k, l, m;
+    int roomHeight, roomWidth;
+    int monster;
+    int cursorPos;
+
+    roomHeight = 0;
+    roomWidth = 0;
+
+    srand(time(NULL));
+
+    //reads the room dimensions
+    for (i = 0; i < strlen(str); i++)
+    {
+        if (str[i] == 'X')
+        {
+            if (i == 1)
+            {
+                roomHeight = str[0] - 48;
+                if (str[3] == ' ')
+                {
+                    roomWidth = str[2] - 48;
+                }
+                else if (str[4] == ' ')
+                {
+                    roomWidth = ((str[2] - 48) * 10) + str[3] - 48;
+                }
+            }
+            else if (i == 2)
+            {
+                roomHeight = ((str[0] - 48) * 10) + str[1] - 48;
+                if (str[4] == ' ')
+                {
+                    roomWidth = str[3] - 48;
+                }
+                else if (str[5] == ' ')
+                {
+                    roomWidth = ((str[3] - 48) * 10) + str[4] - 48;
+                }
+            }
+        }
+
+        //generates error messages if the room height and/or width exceed the maximum space
+        if (roomHeight > 29)
+        {
+            printf("Error: Room height must be a maximum of 29.\n");
+            exit(1);
+        }
+        if (roomWidth > 50)
+        {
+            printf("Error: Room width must be a maximum of 50.\n");
+            exit(1);
+        }
+
+        //creates walls
+        //columns
+        for (m = 0; m < roomHeight; m++)
+        {
+            mvaddch(m + 1 + yVal, 1 + xVal, '|');
+            mvaddch(m + 1 + yVal, roomWidth + xVal, '|');
+        }
+        //rows
+        for (j = 0; j < roomWidth; j++)
+        {
+            mvaddch(1 + yVal, j + 1 + xVal, '-');
+            mvaddch(roomHeight + yVal, j + 1 + xVal, '-');
+         }
+        //floor
+        for (k = 0; k < roomHeight - 2; k++)
+        {
+            for (l = 0; l < roomWidth - 2; l++)
+            {
+                mvaddch(k + 2 + yVal, l + 2 + xVal, '.');
+            }
+        }
+    }
+
+    //creates doors in the north, south, east, and west walls
+    for (i = 0; i < strlen(str); i++)
+    {
+        if (str[i] == 'd')
+        {
+            if (str[i + 1] == 'n')
+            {
+                if (str[i + 3] == ' ')
+                {
+                    mvaddch(1 + yVal, 1 + str[i+2] - 48 + xVal, '+');
+                    *doorY = 2 + yVal;
+                    *doorX = 1 + str[i+2] - 48 + xVal;
+                }
+                else if (str[i + 4] == ' ')
+                {
+                    mvaddch(1 + yVal, 1 + ((str[i+2] - 48) * 10) + str[i+3] - 48 + xVal, '+');
+                    *doorY = 2 + yVal;
+                    *doorX = 1 + ((str[i+2] - 48) * 10) + str[i+3] - 48 + xVal;
+                }
+            }
+            if (str[i + 1] == 's')
+            {
+                if (str[i + 3] == ' ')
+                {
+                    mvaddch(roomHeight + yVal, 1 + str[i+2] - 48 + xVal, '+');
+                    *doorY = roomHeight + yVal - 1;
+                    *doorX = 1 + str[i+2] - 48 + xVal;
+                }
+                else if (str[i + 4] == ' ')
+                {
+                    mvaddch(roomHeight + yVal, 1 + ((str[i+2] - 48) * 10) + str[i+3] - 48 + xVal, '+');
+                    *doorY = roomHeight + yVal - 1;
+                    *doorX = 1 + ((str[i+2] - 48) * 10) + str[i+3] - 48 + xVal;
+                }
+            }
+            if (str[i + 1] == 'e')
+            {
+                if (str[i + 3] == ' ')
+                {
+                    mvaddch(1 + str[i+2] - 48 + yVal, roomWidth + xVal, '+');
+                    *doorY = 1 + str[i+2] - 48 + yVal;
+                    *doorX = roomWidth + xVal - 1;
+                }
+                else if (str[i + 4] == ' ')
+                {
+                    mvaddch(1 + ((str[i+2] - 48) * 10) + str[i + 3] - 48 + yVal, roomWidth + xVal, '+');
+                    *doorY = 1 + ((str[i+2] - 48) * 10) + str[i + 3] - 48 + yVal;
+                    *doorX = roomWidth + xVal - 1;
+                }
+            }
+            if (str[i + 1] == 'w')
+            {
+                if (str[i + 3] == ' ')
+                {
+                    mvaddch(1 + str[i+2] - 48 + yVal, 1 + xVal, '+');
+                    *doorY = 1 + str[i+2] - 48 + yVal;
+                    *doorX = 2 + xVal;
+                }
+                else if (str[i + 4] == ' ')
+                {
+                    mvaddch(1 + ((str[i + 2] - 48) * 10) + str[i+3] - 48 + yVal, 1 + xVal, '+');
+                    *doorY = 1 + ((str[i + 2] - 48) * 10) + str[i+3] - 48 + yVal;
+                    *doorX = 2 + xVal;
+                }
+            }
+        }
+        //creates small gold
+        else if (str[i] == 'g')
+        {
+            if (str[i+2] == ',')
+            {
+                if (str[i+4] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, '*');
+                }
+                else if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, '*');
+                }
+            }
+            else if (str[i+3] == ',')
+            {
+                if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, '*');
+                }
+                else if (str[i+6] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, '*');
+                }
+            }
+        }
+        //creates large gold
+        else if (str[i] == 'G')
+        {
+            if (str[i+2] == ',')
+            {
+                if (str[i+4] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, '8');
+                }
+                else if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, '8');
+                }
+            }
+            else if (str[i+3] == ',')
+            {
+                if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, '8');
+                }
+                else if (str[i+6] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, '8');
+                }
+            }
+        }
+        //creates potions
+        else if (str[i] == 'p')
+        {
+            if (str[i+2] == ',')
+            {
+                if (str[i+4] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, '!');
+                }
+                else if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, '!');
+                }
+            }
+            else if (str[i+3] == ',')
+            {
+                if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, '!');
+                }
+                else if (str[i+6] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, '!');
+                }
+            }
+        }
+        //creates equipment
+        else if (str[i] == 'e' && str[i-1] != 'd')
+        {
+            if (str[i+2] == ',')
+            {
+                if (str[i+4] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, ']');
+                }
+                else if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, ']');
+                }
+            }
+            else if (str[i+3] == ',')
+            {
+                if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, ']');
+                }
+                else if (str[i+6] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, ']');
+                }
+            }
+        }
+        //creates common weapons
+        else if (str[i] == 'w' && str[i-1] != 'd')
+        {
+            if (str[i+2] == ',')
+            {
+                if (str[i+4] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, ')');
+                }
+                else if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, ')');
+                }
+            }
+            else if (str[i+3] == ',')
+            {
+                if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, ')');
+                }
+                else if (str[i+6] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, ')');
+                }
+            }
+        }
+        //creates rare weapons
+        else if (str[i] == 'W')
+        {
+            if (str[i+2] == ',')
+            {
+                if (str[i+4] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, '(');
+                }
+                else if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, '(');
+                }
+            }
+            else if (str[i+3] == ',')
+            {
+                if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, '(');
+                }
+                else if (str[i+6] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, '(');
+                }
+            }
+        }
+        //creates weak monsters, randomized between aquators, bats, snakes, and zombies
+        else if (str[i] == 'm')
+        {
+            monster = (rand() % 4);
+            if (monster == 0)
+            {
+                if (str[i+2] == ',')
+                {
+                    if (str[i+4] == ' ')
+                    {
+                        mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, 'A');
+                    }
+                    else if (str[i+5] == ' ')
+                    {
+                        mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, 'A');
+                    }
+                }
+                else if (str[i+3] == ',')
+                {
+                    if (str[i+5] == ' ')
+                    {
+                        mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, 'A');
+                    }
+                    else if (str[i+6] == ' ')
+                    {
+                        mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, 'A');
+                    }
+                }
+            }
+            else if (monster == 1)
+            {
+                if (str[i+2] == ',')
+                {
+                    if (str[i+4] == ' ')
+                    {
+                        mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, 'B');
+                    }
+                    else if (str[i+5] == ' ')
+                    {
+                        mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, 'B');
+                    }
+                }
+                else if (str[i+3] == ',')
+                {
+                    if (str[i+5] == ' ')
+                    {
+                        mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, 'B');
+                    }
+                    else if (str[i+6] == ' ')
+                    {
+                        mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, 'B');
+                    }
+                }
+            }
+            else if (monster == 2)
+            {
+                if (str[i+2] == ',')
+                {
+                    if (str[i+4] == ' ')
+                    {
+                        mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, 'S');
+                    }
+                    else if (str[i+5] == ' ')
+                    {
+                        mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, 'S');
+                    }
+                }
+                else if (str[i+3] == ',')
+                {
+                    if (str[i+5] == ' ')
+                    {
+                        mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, 'S');
+                    }
+                    else if (str[i+6] == ' ')
+                    {
+                        mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, 'S');
+                    }
+                }
+            }
+            else if (monster == 3)
+            {
+                if (str[i+2] == ',')
+                {
+                    if (str[i+4] == ' ')
+                    {
+                        mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, 'Z');
+                    }
+                    else if (str[i+5] == ' ')
+                    {
+                        mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, 'Z');
+                    }
+                }
+                else if (str[i+3] == ',')
+                {
+                    if (str[i+5] == ' ')
+                    {
+                        mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, 'Z');
+                    }
+                    else if (str[i+6] == ' ')
+                    {
+                        mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, 'Z');
+                    }
+                }
+            }
+        }
+        //creates strong monsters, which are trolls
+        else if (str[i] == 'M')
+        {
+            if (str[i+2] == ',')
+            {
+                if (str[i+4] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, 'T');
+                }
+                else if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, 'T');
+                }
+            }
+            else if (str[i+3] == ',')
+            {
+                if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, 'T');
+                }
+                else if (str[i+6] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, 'T');
+                }
+            }
+        }
+        //creates stairs going up
+        else if (str[i] == 'a')
+        {
+            if (str[i+2] == ',')
+            {
+                if (str[i+4] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, '>');
+                }
+                else if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, '>');
+                }
+            }
+            else if (str[i+3] == ',')
+            {
+                if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, '>');
+                }
+                else if (str[i+6] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, '>');
+                }
+            }
+        }
+        //creates stairs going down
+        else if (str[i] == 'z')
+        {
+            if (str[i+2] == ',')
+            {
+                if (str[i+4] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, '<');
+                }
+                else if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, '<');
+                }
+            }
+            else if (str[i+3] == ',')
+            {
+                if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, '<');
+                }
+                else if (str[i+6] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, '<');
+                }
+            }
+        }
+        //creates the starting position for the hero
+        else if (str[i] == 'h')
+        {
+            if (str[i+2] == ',')
+            {
+                if (str[i+4] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + str[i+3] - 48 + xVal, '@');
+                    cursorPos = i;
+                }
+                else if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + str[i+1] - 48 + yVal, 2 + ((str[i+3] - 48) * 10) + str[i+4] - 48 + xVal, '@');
+                    cursorPos = i;
+                }
+            }
+            else if (str[i+3] == ',')
+            {
+                if (str[i+5] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + str[i+4] - 48 + xVal, '@');
+                    cursorPos = i;
+                }
+                else if (str[i+6] == ' ')
+                {
+                    mvaddch(2 + ((str[i+1] - 48) * 10) + str[i+2] - 48 + yVal, 2 + ((str[i+4] - 48) * 10) + str[i+5] - 48 + xVal, '@');
+                    cursorPos = i;
+                }
+            }
+        }
+    }
+
+    //moves the hero to wherever the specified starting position is
+    move(2 + str[cursorPos+1] - 48 + yVal, 2 + str[cursorPos+3] - 48 + xVal);
+
+    return;
+}
