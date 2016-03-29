@@ -1,0 +1,28 @@
+#include <stido.h>
+#include <stdlib.h>
+
+int main (char argc, char* argv) 
+{
+}
+
+void parsingFile (int argc, char* argv) 
+{
+    FILE* openFile = fopen(argv[1], "r");
+    
+    
+
+    if (argc != 2)
+    {
+        printf("Not enough files input! Please try again\n");
+    }
+    
+    if (openFile == NULL)
+    {
+        printf("No content in the file opened\n");
+        return 1;
+    }
+    
+    fget();
+    return;
+    
+}
